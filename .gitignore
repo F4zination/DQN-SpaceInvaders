@@ -1,1 +1,33 @@
+# Python cache/bytecode
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE/editor noise
+.idea/
+.vscode/
+.DS_Store
+.ipynb_checkpoints/
+
+# Logs and debug output
+*.log
+runs/
+wandb/
+lightning_logs/
+
+# Model artifacts and checkpoints
+*.pth
+*.pt
+
+# Gym / Atari rollouts and videos
+space_invaders*/
+*.mp4
+
+# Local data notebooks produce
 cartpole-training*/
+cartpole-training-v2/
