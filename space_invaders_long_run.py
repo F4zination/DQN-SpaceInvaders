@@ -43,8 +43,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 # Training configuration
-training_period = 250           # Record video every 250 episodes
-num_training_episodes = 5_000  # Total training episodes
+training_period = 5000           # Record video every 250 episodes
 env_name = "ALE/SpaceInvaders-v5" # has a default obs tpye of rgb, 4 frames are skipped and the repeat action propability is 0.25
 
 # Set up logging for episode statistics
@@ -69,7 +68,7 @@ env = RecordVideo(
 # Track statistics for every episode (lightweight)
 env = RecordEpisodeStatistics(env)
 
-print(f"Training for {num_training_episodes} episodes")
+
 print(f"Videos will be recorded every {training_period} episodes")
 print(f"Videos saved to: {video_folder}/")
 

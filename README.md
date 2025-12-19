@@ -10,7 +10,7 @@
 </div>
 
 ## 🕹️ Hero
-![Agent playing Space Invaders](media/space_invaders_agent.gif)
+![Agent playing Space Invaders](media/training-episode-1500-ezgif.com-video-to-gif-converter.gif)
 
 > Replace the placeholder above with your favorite .gif or screenshot of the trained agent.
 
@@ -45,9 +45,8 @@
 | Observation size | 84x84 (grayscale) | Downsampled Atari frames. |
 
 ## 📈 Performance
-![Training reward curve](plots/training_curve.png)
+![Training reward curve](/media/plot.png)
 
-> Drop your Matplotlib or W&B exported plot at `plots/training_curve.png` to showcase reward progression.
 
 ## 🧭 Installation & Usage
 ```bash
