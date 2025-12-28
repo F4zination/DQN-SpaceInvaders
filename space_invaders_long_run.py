@@ -44,7 +44,7 @@ args = parser.parse_args()
 
 # Training configuration
 training_period = 5000           # Record video every 250 episodes
-env_name = "ALE/SpaceInvaders-v5" # has a default obs tpye of rgb, 4 frames are skipped and the repeat action propability is 0.25
+env_name = "ALE/SpaceInvaders-v5" # has a default obs type of rgb, 4 frames are skipped and the repeat action probability is 0.25
 
 # Set up logging for episode statistics
 logging.basicConfig(level=logging.INFO, format='%(message)s')
@@ -100,13 +100,14 @@ class QNetwork(nn.Module):
         super().__init__()
 
         self.conv_stack = nn.Sequential(
-            nn.Conv2d(in_channels, 16, kernel_size=8, stride=4 ),
+            # Layer 1: 32 filters, 8x8 kernel, stride 4
+            nn.Conv2d(in_channels, 32, kernel_size=8, stride=4),
             nn.ReLU(),
-            nn.Conv2d(16, 32, kernel_size=4, stride=2),
+            # Layer 2: 64 filters, 4x4 kernel, stride 2
+            nn.Conv2d(32, 64, kernel_size=4, stride=2),
             nn.ReLU(),
-            nn.Conv2d(32, 64, kernel_size=2, stride=1),
-            nn.ReLU(),
-            nn.Conv2d(64, 128, kernel_size=2, stride=1),
+            # Layer 3: 64 filters, 3x3 kernel, stride 1
+            nn.Conv2d(64, 64, kernel_size=3, stride=1),
             nn.ReLU(),
             nn.Flatten(),
         )
@@ -165,8 +166,9 @@ class SpaceInvaderAgent:
         learning_rate: float,
         initial_epsilon: float,
         epsilon_decay: float,
+        epsilon_decay_steps: float,
         final_epsilon: float,
-        discount_factor: float = 0.95,
+        discount_factor: float = 0.99,
         frame_stacking: int = FRAME_STACK_SIZE,
         device: str | None = None,
         log_dir: str = "runs/space_invaders_dqn" # Added log_dir
@@ -194,6 +196,7 @@ class SpaceInvaderAgent:
         self.epsilon = initial_epsilon
         self.epsilon_decay = epsilon_decay
         self.final_epsilon = final_epsilon
+        self.epsilon_decay_steps = epsilon_decay_steps
 
         # initialize a replay buffer
         self.memory = ReplayMemory(1_000_000)
@@ -220,7 +223,9 @@ class SpaceInvaderAgent:
         else:
             raise ValueError(f"Can't infer channel dimension from obs shape {obs.shape}")
 
-        return torch.from_numpy(obs).to(dtype=torch.float32, device=self.device)
+        tensor = torch.from_numpy(obs).to(dtype=torch.float32, device=self.device)
+
+        return tensor / 255
 
     def get_action(self, obs) -> int:
         # With probability epsilon: explore (random action)
@@ -250,6 +255,13 @@ class SpaceInvaderAgent:
 
         # Compute Q-values for current states
         q_values = self.policy_network(state_batch).gather(1, action_batch).squeeze(1)
+        state_action_values = self.policy_network(state_batch)
+        avg_q_value = state_action_values.max(dim=1)[0].mean().item()
+
+        wandb.log({
+            "avg_q_value": state_action_values.mean().item(),
+            "max_q_value": state_action_values.max().item(),
+            })
 
         # Compute target Q-values using the target network
         with torch.no_grad():
@@ -274,7 +286,7 @@ class SpaceInvaderAgent:
 
     def decay_epsilon(self):
         """Reduce exploration rate after each episode."""
-        self.epsilon = max(self.final_epsilon, self.epsilon - self.epsilon_decay)
+        self.epsilon = max(self.final_epsilon, start_epsilon - (global_steps / self.EPSILON_DECAY_STEPS) * (start_epsilon - final_epsilon))
 
     # Add this inside the SpaceInvaderAgent class
     def save_checkpoint(self, episode, filename="dqn_space_invaders.pth"):
@@ -311,13 +323,14 @@ n_episodes = 100_000        # Number of runs
 start_epsilon = 1.0         # Start with 100% random actions
 epsilon_decay = start_epsilon / (n_episodes / 2)  # Reduce exploration over time
 final_epsilon = 0.1         # Always keep some exploration
-
+EPSILON_DECAY_STEPS = 100_000
 
 agent = SpaceInvaderAgent(
     env=stacked_env,
     learning_rate=learning_rate,
     initial_epsilon=start_epsilon,
     epsilon_decay=epsilon_decay,
+    epsilon_decay_steps=EPSILON_DECAY_STEPS,
     final_epsilon=final_epsilon,
 )
 
@@ -330,12 +343,13 @@ wandb.init(
         "n_episodes": n_episodes,
         "batch_size": agent.batch_size,
         "epsilon_decay": epsilon_decay,
+        "gamma": 0.99,
         "frame_stack": FRAME_STACK_SIZE,
         "device": str(agent.device),
     }
 )
 
-
+wandb.watch(agent.policy_network, log="all", log_freq=100)
 
 steps_in_episode = []
 global_steps = 0
@@ -355,9 +369,11 @@ for episode in range(n_episodes):
 
         step_counter += 1
         global_steps += 1 
-        agent.memory.push(state, action, next_state, reward, float(done))
+        clipped_reward = np.clip(reward, -1, 1)
+        agent.memory.push(state, action, next_state, clipped_reward, float(done))
 
-        agent.update()
+        if global_steps % 4 == 0:
+            agent.update()
 
         state = next_state
 
@@ -366,24 +382,20 @@ for episode in range(n_episodes):
             agent.target_network.eval()
             print(f"Episode {episode} - Step {step_counter}: Updated target network.")
 
-    # --- Tensorboard Logging
-    agent.writer.add_scalar("Reward/episode", episode_reward, episode)
-    agent.writer.add_scalar("Stats/Epsilon", agent.epsilon, episode)
-    agent.writer.add_scalar("Stats/Episode_Length", step_counter, episode)
 
     agent.decay_epsilon()
     steps_in_episode.append(step_counter)
 
     # --- WandB Logging ---
-    metrics = {
+    wandb.log({
+        "loss": agent.training_error[-1] if agent.training_error else 0,
+        "epsilon": agent.epsilon,
+        "episode_reward": episode_reward,
         "episode": episode,
-        "reward": episode_reward,
-        "epsilon": agent.epsilon
-    }
-    if agent.training_error:
-        metrics["loss"] = agent.training_error[-1]
-    
-    wandb.log(metrics)
+        "global_step": global_steps,
+        "steps_per_episode": step_counter,
+
+    })
 
     # --- Save Model every 500 episodes ---
     if episode % 500 == 0:
