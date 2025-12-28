@@ -286,7 +286,7 @@ class SpaceInvaderAgent:
 
     def decay_epsilon(self):
         """Reduce exploration rate after each episode."""
-        self.epsilon = max(self.final_epsilon, start_epsilon - (global_steps / self.EPSILON_DECAY_STEPS) * (start_epsilon - final_epsilon))
+        self.epsilon = max(self.final_epsilon, start_epsilon - (global_steps / self.epsilon_decay_steps) * (start_epsilon - final_epsilon))
 
     # Add this inside the SpaceInvaderAgent class
     def save_checkpoint(self, episode, filename="dqn_space_invaders.pth"):
@@ -358,6 +358,7 @@ for episode in range(n_episodes):
     state, info = stacked_env.reset()
     step_counter = 0
     episode_reward = 0.0
+    last_lives = 3
     done = False
 
     while not done:
@@ -370,7 +371,11 @@ for episode in range(n_episodes):
         step_counter += 1
         global_steps += 1 
         clipped_reward = np.clip(reward, -1, 1)
-        agent.memory.push(state, action, next_state, clipped_reward, float(done))
+        current_lives = info.get('lives', 3)
+        life_lost = current_lives < last_lives 
+        agent.memory.push(state, action, next_state, clipped_reward, float(terminated or life_lost))
+
+        last_lives = current_lives
 
         if global_steps % 4 == 0:
             agent.update()
