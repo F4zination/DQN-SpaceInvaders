@@ -49,10 +49,9 @@ env_name = "ALE/SpaceInvaders-v5" # has a default obs type of rgb, 4 frames are 
 # Set up logging for episode statistics
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 
-# Create environment with periodic video recording
-# possible to activate full action space with full_action_space=True
-# using grayscaling to reduce input of Q-Network
-env = gym.make(env_name, render_mode="rgb_array", obs_type="grayscale")
+# Create the environment
+# mode=1 because otherwise the bullets are invisible!!! BUG ON GYM SIDE jissue #524
+env = gym.make(env_name, render_mode="rgb_array", obs_type="grayscale", mode=1)
 
 video_folder_suffix = f"_try{args.try_num}" if args.try_num is not None else ""
 video_folder = f"space_invaders{video_folder_suffix}"

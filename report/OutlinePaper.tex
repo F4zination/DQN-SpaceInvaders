@@ -312,7 +312,7 @@
 %
 % paper title
 % can use linebreaks \\ within to get better formatting as desired
-\title{An outline for a scientific paper}
+\title{Deep Q-Learning for Space Invaders}
 %
 %
 % author names and IEEE memberships
@@ -324,15 +324,15 @@
 % was not built to handle multiple paragraphs
 %
 
-\author{ \parbox{3 in}{\centering Reinhold von Schwerin\\
+\author{ \parbox{3 in}{\centering Finn Rehnert\\
 				 University of Applied Sciences Ulm\\
-         Programme Leader Business IT\\
-         {\tt\small {r.schwerin}@hs-ulm.de}}
+         Advanced Machine Learning Project\\
+         {\tt\small {refinn01}@thu.de}}
 }
 
 
 % The paper headers
-\markboth{A paper outline}%
+\markboth{Deep Q-Learning for Space Invaders}%
 {}
 
 
@@ -354,7 +354,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
-
+todo write abstract
 \end{abstract}
 
 % For peerreview papers, this IEEEtran command inserts a page break and
@@ -366,46 +366,94 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 \label{sec:intro}
-this paper is shows an implmenation of a DQN for the atari game space invaders just like \cite{mnih2013playingatarideepreinforcement}
+The Hook: Briefly define Reinforcement Learning (an agent learning by interacting with an environment) and the specific challenge of high-dimensional inputs (pixels).
 
-\subsection{Scenario} \label{subsec:scenario}
+Motivation: Explicitly state: "Since RL was not covered in the course lectures, this project serves as an explorative study into Deep Reinforcement Learning."
 
+The Goal: To replicate the success of the 2013 DeepMind paper on the specific environment of Space Invaders. \cite{mnih2013playingatarideepreinforcement}
 
-\subsection{Structure of the Paper} \label{subsec:struct}
+\subsection{Scenario} 
+\label{subsec:scenario}
+Describe the Space Invaders environment (part of the OpenAI Gym/Ale).
+
+Define the State Space: Raw pixels (RGB images).
+
+Define the Action Space: Discrete actions (Move Left, Move Right, Shoot, No-op).
+
+Define the Reward Function: Points scored for killing aliens.
+
+\subsection{Structure of the Paper} 
+\label{subsec:struct}
 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Literature Review} \label{sec:litrev}
+\section{Literature Review} 
+\label{sec:litrev}
+Note: This is where you explain the "Why" behind the math.
 
+\subsection{From Tabular Learning to Function Approximation} 
 
-\subsection{First Method} \label{subsec:snapshot}
+Explain traditional Q-Learning (using a Q-table).
 
-\subsection{Second Method} \label{subsec:delta}
+Explain the limitation: The "Curse of Dimensionality." You cannot have a table row for every possible pixel combination in Space Invaders.
+
+Introduce the solution: Using a function approximator (Neural Network) to estimate Q-values.
+
+\subsection{The Deep Q-Network (DQN) Breakthrough} 
+
+Discuss the Mnih et al. (2013) paper.
+
+Highlight the two key innovations that stabilized training (which you implemented):
+
+Experience Replay (breaking correlation between consecutive frames).
+
+Target Networks (stabilizing the moving target).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Concept for problem solving} \label{sec:concept}
+\section{Concept for problem solving} 
+\label{sec:concept}
+Define the Bellman Equation.
+$$Q(s, a) = r + \gamma \max_{a'} Q(s', a')$$
 
+Explain the Loss Function. You are minimizing the Mean Squared Error between the predicted Q-value and the target Q-value.
+Explain $\epsilon$-greedy exploration: How the agent balances exploring random moves vs. exploiting known best moves.
  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Implementation} \label{sec:impl}
+\subsection{Overall Solution Strategy}
 
+Mention the tools used: Python, PyTorch/TensorFlow, OpenAI Gym.
+High-level data flow: Environment $\rightarrow$ Wrapper $\rightarrow$ Buffer $\rightarrow$ Network $\rightarrow$ Optimizer.
 
-\subsection{Overall Solution Strategy} \label{subsec:problem}
+\subsection{Preprocessing and Wrappers} 
 
+Crucial for Atari: Explain how you processed the raw inputs.
+Grayscale (3 channels $\rightarrow$ 1 channel).
+Resizing (e.g., to 84x84).
 
-\subsection{Step 1} \label{subsec:new}
+Frame Stacking: Explain why this is needed (a single image doesn't show direction/velocity; stacking 4 frames gives temporal context).
 
-\subsection{Step 2} \label{subsec:modify}
+\subsection{Network Architecture and Training Loop}
+
+Describe the CNN architecture (Convolutional layers $\rightarrow$ Fully connected layers $\rightarrow$ Output nodes for each action).
+Describe the training loop (Sample batch $\rightarrow$ Calculate Loss $\rightarrow$ Backprop).
+Mention Hyperparameters (Learning rate, Gamma, Buffer size).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Further steps} \label{sec:further}
+\section{Results and Evaluation}
+Critique: Your original skeleton skipped this, but for an ML project, this is mandatory. You must insert this section before "Further Steps."
 
+Training Curve: Plot Episode (x-axis) vs. Average Reward (y-axis).
+
+Qualitative Analysis: Does the agent actually play well? Does it learn to hide behind the shields?
+
+Comparison: Compare the trained agent against a "Random Agent" (one that just presses buttons randomly).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Conclusion} \label{sec:concl}
+\section{Conclusion} 
+\label{sec:concl}
 
 
 
