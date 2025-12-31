@@ -303,6 +303,7 @@
 % There should be no need to do such things with IEEEtran.cls V1.6 and later.
 % (Unless specifically asked to do so by the journal or conference you plan
 % to submit to, of course. )
+\usepackage[printonlyused]{acronym}
 
 
 % correct bad hyphenation here
@@ -366,39 +367,59 @@ todo write abstract
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 \label{sec:intro}
-The Hook: Briefly define Reinforcement Learning (an agent learning by interacting with an environment) and the specific challenge of high-dimensional inputs (pixels).
+\ac{RL} has been an area of active research since many years. However, only recent advancements have really unvveiled its potential. 
+Notebly the defeat of Lee Sedol by AlphaGo \cite{silver2016mastering} and the human-level performance in Atari games \cite{mnih2013playingatarideepreinforcement} have shown impressive results.
+In \ac{RL}, an agent learns to make decisions by interacting with an environment. The agent receives observations (states) from the environment, takes actions, and receives rewards based on those actions. 
+The goal of the agent is to learn a policy that maximizes the cumulative reward over time.
 
-Motivation: Explicitly state: "Since RL was not covered in the course lectures, this project serves as an explorative study into Deep Reinforcement Learning."
-
-The Goal: To replicate the success of the 2013 DeepMind paper on the specific environment of Space Invaders. \cite{mnih2013playingatarideepreinforcement}
+\par
+Since \ac{RL} was not covered in the course lectures, this project serves as an explorative study into Deep Reinforcement Learning.
+The goal of this project is to replicate the success of the 2013 DeepMind paper on the specific environment of Space Invaders \cite{mnih2013playingatarideepreinforcement}.
 
 \subsection{Scenario} 
 \label{subsec:scenario}
-Describe the Space Invaders environment (part of the OpenAI Gym/Ale).
+Space Invaders is a classic arcade game where the player controls a spaceship at the bottom of the screen and must shoot down waves of descending aliens while avoiding their attacks. 
+The game ends when the player loses all lives or when the aliens reach the bottom of the screen \cite{AtariAgeSpaceInvadersManual}. Space Invaders was designed and developed by Tomohiro Nishikado and was released in 1978 \cite{IMDbSpaceInvadersReleaseInfo}.
+\par
 
-Define the State Space: Raw pixels (RGB images).
+One big challenge in \ac{RL} is to define the environment, state space, action space, and reward function appropriately.
+The originally from OpenAI developed Gym environment \cite{brockman2016openaigym} provides a standardized interface for various environments. Since its deprecation, a community-driven fork called Gymnasium is actively maintained.
+This project uses the Gymnasium implementation of the Atari 2600 Space Invaders environment, which is based on the Arcade Learning Environment (ALE) \cite{Bellemare2013ArcadeLearningEnvironment}.
+\par
 
-Define the Action Space: Discrete actions (Move Left, Move Right, Shoot, No-op).
+The state space for visual tasks like Space Invaders can easyly become high-dimensional. In this project, the state space is defined as raw pixel data (RGB images) of the game screen.
+The action space is discrete, consisting of six actions: Move Left, Move Right, Shoot, Shoot Right, Shoot Left and No-op (do nothing) \cite{ALE_SpaceInvaders2025}.
+\par
 
-Define the Reward Function: Points scored for killing aliens.
+The reward function is defined based on the game score. The agent receives positive rewards for shooting down aliens and negative rewards for losing lives. The specific reward structure will be detailed in Section \ref{subsec:networkandtraining}.
 
 \subsection{Structure of the Paper} 
 \label{subsec:struct}
 
-
+The structure of this paper is as follows:
+\begin{itemize}
+    \item Section \ref{sec:litrev} provides a literature review, discussing the transition from tabular learning to function approximation and the Deep Q-Network (DQN) breakthrough.
+    \item Section \ref{sec:concept} outlines the overall solution strategy, including preprocessing steps, network architecture, and training loop.
+    \item Section \ref{sec:results} presents the results and evaluation of the trained agent.
+    \item Finally, Section \ref{sec:conclusion} concludes the paper and discusses potential future work. 
+\end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Literature Review} 
 \label{sec:litrev}
-Note: This is where you explain the "Why" behind the math.
+While \ac{RL} has been studied for decades, the combination of \ac{RL} with deep learning has led to significant advancements in the field \cite{Arulkumaran2017DeepRLSurvey}. 
+This section reviews key concepts and breakthroughs that laid the foundation for Deep Q-Learning.
 
 \subsection{From Tabular Learning to Function Approximation} 
+Traditional Q-Learning is based on the so called Q-table. A table that contains for each possible state that the agent can be in, a corresponding action to take.
+This approach works well for simple environments with limited states.
 
-Explain traditional Q-Learning (using a Q-table).
+The "Curse of Dimensionality" describes the limitation of traditional Q-Learning: it states that for higher dimensional inputs like
+visuals it is not possible to have a table row for each pixel combination on the screen. The combination of possible pixel values grows exponentially with the number of pixels.
+For example, a simple 84x84 grayscale image has $256^{(84*84)}$ possible states, which is more than the number of atoms in the observable universe which can be approximated to $10^{80}$ \cite{Eddington_1931}.
 
-Explain the limitation: The "Curse of Dimensionality." You cannot have a table row for every possible pixel combination in Space Invaders.
-
-Introduce the solution: Using a function approximator (Neural Network) to estimate Q-values.
+The solution to this problem is to use a function approximator, such as a Neural Network, to estimate the Q-values for each state-action pair.
+This allows the agent to generalize from seen states to unseen states, enabling it to handle high-dimensional inputs effectively.
 
 \subsection{The Deep Q-Network (DQN) Breakthrough} 
 
@@ -420,8 +441,7 @@ $$Q(s, a) = r + \gamma \max_{a'} Q(s', a')$$
 Explain the Loss Function. You are minimizing the Mean Squared Error between the predicted Q-value and the target Q-value.
 Explain $\epsilon$-greedy exploration: How the agent balances exploring random moves vs. exploiting known best moves.
  
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \subsection{Overall Solution Strategy}
 
 Mention the tools used: Python, PyTorch/TensorFlow, OpenAI Gym.
@@ -436,6 +456,7 @@ Resizing (e.g., to 84x84).
 Frame Stacking: Explain why this is needed (a single image doesn't show direction/velocity; stacking 4 frames gives temporal context).
 
 \subsection{Network Architecture and Training Loop}
+\label{subsec:networkandtraining}
 
 Describe the CNN architecture (Convolutional layers $\rightarrow$ Fully connected layers $\rightarrow$ Output nodes for each action).
 Describe the training loop (Sample batch $\rightarrow$ Calculate Loss $\rightarrow$ Backprop).
@@ -444,6 +465,8 @@ Mention Hyperparameters (Learning rate, Gamma, Buffer size).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Results and Evaluation}
+\label{sec:results}
+
 Critique: Your original skeleton skipped this, but for an ML project, this is mandatory. You must insert this section before "Further Steps."
 
 Training Curve: Plot Episode (x-axis) vs. Average Reward (y-axis).
@@ -453,7 +476,7 @@ Qualitative Analysis: Does the agent actually play well? Does it learn to hide b
 Comparison: Compare the trained agent against a "Random Agent" (one that just presses buttons randomly).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion} 
-\label{sec:concl}
+\label{sec:conclusion}
 
 
 
@@ -464,6 +487,13 @@ Comparison: Compare the trained agent against a "Random Agent" (one that just pr
 %\bibliographystyle{Literatur/natdin}
 %\bibliographystyle{Literatur/unsrtdin}
 %\bibliographystyle{Literatur/plaindin}
+
+\begin{acronym}[IEEE]
+\acro{RL}{Reinforcement Learning}
+\acro{DQN}{Deep Q-Network}
+\acro{NN}{Neural Network}
+\end{acronym}
+
 \bibliographystyle{IEEEtran}
 \bibliography{literature/bibliography}
 

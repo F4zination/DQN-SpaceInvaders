@@ -21,11 +21,66 @@
 \providecommand{\BIBdecl}{\relax}
 \BIBdecl
 
+\bibitem{silver2016mastering}
+D.~Silver, A.~Huang, C.~J. Maddison, A.~Guez, L.~Sifre, G.~Van Den~Driessche,
+  J.~Schrittwieser, I.~Antonoglou, V.~Panneershelvam, M.~Lanctot \emph{et~al.},
+  ``Mastering the game of go with deep neural networks and tree search,''
+  \emph{nature}, vol. 529, no. 7587, pp. 484--489, 2016.
+
 \bibitem{mnih2013playingatarideepreinforcement}
 \BIBentryALTinterwordspacing
 V.~Mnih, K.~Kavukcuoglu, D.~Silver, A.~Graves, I.~Antonoglou, D.~Wierstra, and
   M.~Riedmiller, ``Playing atari with deep reinforcement learning,'' 2013.
   [Online]. Available: \url{https://arxiv.org/abs/1312.5602}
 \BIBentrySTDinterwordspacing
+
+\bibitem{AtariAgeSpaceInvadersManual}
+\BIBentryALTinterwordspacing
+{AtariAge}. (2025) Atari 2600 manuals (html) - space invaders (atari).
+  Accessed: 2025-12-31. [Online]. Available:
+  \url{https://atariage.com/manual_html_page.php?SoftwareLabelID=460}
+\BIBentrySTDinterwordspacing
+
+\bibitem{IMDbSpaceInvadersReleaseInfo}
+\BIBentryALTinterwordspacing
+{IMDb}. (n.d.) Release info for space invaders (1978) - imdb. Accessed:
+  2025-12-31. [Online]. Available:
+  \url{https://www.imdb.com/title/tt0294282/releaseinfo/}
+\BIBentrySTDinterwordspacing
+
+\bibitem{brockman2016openaigym}
+\BIBentryALTinterwordspacing
+G.~Brockman, V.~Cheung, L.~Pettersson, J.~Schneider, J.~Schulman, J.~Tang, and
+  W.~Zaremba, ``Openai gym,'' 2016. [Online]. Available:
+  \url{https://arxiv.org/abs/1606.01540}
+\BIBentrySTDinterwordspacing
+
+\bibitem{Bellemare2013ArcadeLearningEnvironment}
+\BIBentryALTinterwordspacing
+M.~G. Bellemare, Y.~Naddaf, J.~Veness, and M.~Bowling, ``The arcade learning
+  environment: An evaluation platform for general agents,'' \emph{Journal of
+  Artificial Intelligence Research}, vol.~47, pp. 253--279, 2013. [Online].
+  Available: \url{https://www.jair.org/index.php/jair/article/view/10819}
+\BIBentrySTDinterwordspacing
+
+\bibitem{ALE_SpaceInvaders2025}
+\BIBentryALTinterwordspacing
+{Farama Foundation}. (2025) Spaceinvaders — arcade learning environment
+  documentation. Accessed: 2025-12-31. [Online]. Available:
+  \url{https://ale.farama.org/environments/space_invaders/}
+\BIBentrySTDinterwordspacing
+
+\bibitem{Arulkumaran2017DeepRLSurvey}
+\BIBentryALTinterwordspacing
+K.~Arulkumaran, M.~P. Deisenroth, M.~Brundage, and A.~A. Bharath, ``A brief
+  survey of deep reinforcement learning,'' \emph{IEEE Signal Processing
+  Magazine}, 2017, arXiv:1708.05866. [Online]. Available:
+  \url{https://arxiv.org/abs/1708.05866}
+\BIBentrySTDinterwordspacing
+
+\bibitem{Eddington_1931}
+A.~S. Eddington, ``Preliminary note on the masses of the electron, the proton,
+  and the universe,'' \emph{Mathematical Proceedings of the Cambridge
+  Philosophical Society}, vol.~27, no.~1, pp. 15--19, 1931.
 
 \end{thebibliography}
