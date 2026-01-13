@@ -352,6 +352,7 @@ wandb.watch(agent.policy_network, log="all", log_freq=100)
 
 steps_in_episode = []
 global_steps = 0
+highest_reward = 0.0  # Track the highest reward achieved
 
 for episode in range(n_episodes):
     state, info = stacked_env.reset()
@@ -390,11 +391,16 @@ for episode in range(n_episodes):
     agent.decay_epsilon()
     steps_in_episode.append(step_counter)
 
+    # Update highest reward if current episode achieved a new high
+    if episode_reward > highest_reward:
+        highest_reward = episode_reward
+
     # --- WandB Logging ---
     wandb.log({
         "loss": agent.training_error[-1] if agent.training_error else 0,
         "epsilon": agent.epsilon,
         "episode_reward": episode_reward,
+        "highest_reward": highest_reward,
         "episode": episode,
         "global_step": global_steps,
         "steps_per_episode": step_counter,
