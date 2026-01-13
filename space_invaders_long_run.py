@@ -31,6 +31,45 @@ from collections import defaultdict
 
 gym.register_envs(ale_py)
 
+
+class MaxAndSkipEnv(gym.Wrapper):
+    """
+    Return only every `skip`-th frame and take max over last 2 frames.
+    This handles flickering sprites in Atari games.
+    """
+    def __init__(self, env, skip=4):
+        super().__init__(env)
+        self._skip = skip
+        # Buffer to store last 2 observations for max pooling
+        self._obs_buffer = np.zeros((2,) + env.observation_space.shape, dtype=env.observation_space.dtype)
+
+    def step(self, action):
+        total_reward = 0.0
+        terminated = False
+        truncated = False
+        info = {}
+        
+        for i in range(self._skip):
+            obs, reward, terminated, truncated, info = self.env.step(action)
+            # Store in buffer (keep last 2 frames)
+            if i == self._skip - 2:
+                self._obs_buffer[0] = obs
+            if i == self._skip - 1:
+                self._obs_buffer[1] = obs
+            total_reward += reward
+            if terminated or truncated:
+                break
+        
+        # Take element-wise max over last 2 frames
+        max_frame = self._obs_buffer.max(axis=0)
+        return max_frame, total_reward, terminated, truncated, info
+
+    def reset(self, **kwargs):
+        obs, info = self.env.reset(**kwargs)
+        self._obs_buffer[0] = obs
+        self._obs_buffer[1] = obs
+        return obs, info
+
 # CLI args
 parser = argparse.ArgumentParser(description="Space Invaders DQN long run")
 parser.add_argument(
@@ -51,7 +90,12 @@ logging.basicConfig(level=logging.INFO, format='%(message)s')
 
 # Create the environment
 # mode=1 because otherwise the bullets are invisible!!! BUG ON GYM SIDE jissue #524
-env = gym.make(env_name, render_mode="rgb_array", obs_type="grayscale", mode=1)
+# frameskip=1 to disable built-in frame skipping (we use MaxAndSkipEnv instead)
+# repeat_action_probability=0 for deterministic frame skipping
+env = gym.make(env_name, render_mode="rgb_array", obs_type="grayscale", mode=1, frameskip=1, repeat_action_probability=0)
+
+# Apply MaxAndSkipEnv to handle flickering sprites (takes max over last 2 frames)
+env = MaxAndSkipEnv(env, skip=4)
 
 video_folder_suffix = f"_try{args.try_num}" if args.try_num is not None else ""
 video_folder = f"space_invaders{video_folder_suffix}"
@@ -238,7 +282,7 @@ class SpaceInvaderAgent:
             return int(torch.argmax(q, dim=1).item())
 
     def update(self):
-        if len(self.memory) < 5000:
+        if len(self.memory) < 50_000:
             return
 
         batch = self.memory.sample(self.batch_size)
@@ -271,6 +315,7 @@ class SpaceInvaderAgent:
 
         self.optimizer.zero_grad()
         loss.backward()
+        torch.nn.utils.clip_grad_norm_(self.policy_network.parameters(), max_norm=10)  # Add this
         self.optimizer.step()
 
         # Log Loss to TensorBoard
@@ -322,7 +367,7 @@ n_episodes = 100_000        # Number of runs
 start_epsilon = 1.0         # Start with 100% random actions
 epsilon_decay = start_epsilon / (n_episodes / 2)  # Reduce exploration over time
 final_epsilon = 0.1         # Always keep some exploration
-EPSILON_DECAY_STEPS = 100_000
+EPSILON_DECAY_STEPS = 300_000
 
 agent = SpaceInvaderAgent(
     env=stacked_env,
